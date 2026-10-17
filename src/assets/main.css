@@ -1,0 +1,702 @@
+/* ==========================================================================
+   Sistema de diseno - "ledger de campo"
+   ==========================================================================
+
+   El sujeto es un formulario de las Naciones Unidas que se completa a mano en
+   una jornada de terreno, a veces sin buena luz y a veces sin red. La
+   referencia visual no es un dashboard de SaaS: es un formulario
+   institucional impreso, con su retícula, sus reglas finas y su tipografía de
+   documento de trabajo.
+
+   Decisiones y por que:
+
+   - Fondo calido casi papel (#FBFAF7), no blanco puro. Reduce el cansancio
+     visual en una pantalla que se mira horas seguidas y separa la app del
+     escritorio sin recurrir a sombras.
+
+   - Un solo color de marca, el azul ONU (#0B4F9C), y una escala de grises
+     coldos para toda la estructura. Los colores de estado (ambar, verde,
+     rojo) son los unicos acentos semanticamente cargados, asi que cuando se
+     ve color significa algo y no decoracion.
+
+   - Archivo para texto: es la tipografia de la ONU (diseñada junto con su
+     identidad visual) y tiene las cifras tabulares que necesita una grilla de
+     conteo. Inter Tight para los numeros grandes de la cabecera. JetBrains
+     Mono para identificadores, coordenadas y codigos: alineacion vertical
+     exacta sin trucos de CSS.
+
+   - Radios chicos (4-6px). Un formulario oficial no tiene esquinas
+     redondeadas de 16px; la suavidad la aportan los colores y el espacio.
+   ========================================================================== */
+
+@import '@fontsource-variable/archivo/index.css';
+@import '@fontsource-variable/inter-tight/index.css';
+@import '@fontsource/jetbrains-mono/400.css';
+@import '@fontsource/jetbrains-mono/500.css';
+
+:root {
+  /* --- Superficies ---------------------------------------------------- */
+  --papel: #fbfaf7;
+  --superficie: #ffffff;
+  --superficie-2: #f5f4f0;
+  --superficie-3: #eeece6;
+
+  /* --- Tinta ---------------------------------------------------------- */
+  --tinta: #16202e;
+  --tinta-2: #45505f;
+  --tinta-3: #6b7684;
+  --tinta-4: #98a1ad;
+
+  /* --- Reglas --------------------------------------------------------- */
+  --regla: #dedbd3;
+  --regla-fuerte: #c7c3b8;
+
+  /* --- Marca ---------------------------------------------------------- */
+  --azul: #0b4f9c;
+  --azul-fuerte: #093d7a;
+  --azul-tenue: #e8f0f9;
+  --azul-borde: #b9d3ec;
+
+  /* --- Estados (los unicos acentos semanticos) ------------------------ */
+  --borrador: #8a6d1f;
+  --borrador-fondo: #fdf6e3;
+  --borrador-borde: #e8d49b;
+
+  --enviada: #0f6b5c;
+  --enviada-fondo: #e4f4f0;
+  --enviada-borde: #a8d8cd;
+
+  --validada: #2f5d2f;
+  --validada-fondo: #e9f2e9;
+  --validada-borde: #b3d0b3;
+
+  --peligro: #a3231f;
+  --peligro-fondo: #fdeceb;
+  --peligro-borde: #f0bcb9;
+
+  --aviso: #9a5b12;
+  --aviso-fondo: #fdf1e3;
+
+  /* --- Tipografia ----------------------------------------------------- */
+  --fuente-ui: 'Archivo Variable', 'Segoe UI', system-ui, sans-serif;
+  --fuente-cifra: 'Inter Tight Variable', 'Archivo Variable', system-ui, sans-serif;
+  --fuente-mono: 'JetBrains Mono', 'Cascadia Mono', ui-monospace, monospace;
+
+  /* --- Ritmo vertical: base 4px, multiplos de 8 para los bloques ------- */
+  --e-1: 4px;
+  --e-2: 8px;
+  --e-3: 12px;
+  --e-4: 16px;
+  --e-6: 24px;
+  --e-8: 32px;
+  --e-12: 48px;
+
+  --radio-s: 4px;
+  --radio-m: 6px;
+
+  /* Alto de campo: 40px es comodo para mouse y teclado; 36px para el compacto.
+     WCAG 2.5.5 pide 44px para targets tactiles, pero en un escritorio Tauri
+     36-40px es el punto donde el campo se siente sin ser una barra. */
+  --alto-campo: 40px;
+  --alto-campo-sm: 36px;
+}
+
+/* ==========================================================================
+   Reset acotado. Vuetify ya pone su propio reset; esto solo ajusta lo que
+   afecta la legibilidad del formulario.
+   ========================================================================== */
+
+html {
+  overflow-y: auto;
+  background-color: var(--papel);
+}
+
+body {
+  font-family: var(--fuente-ui);
+  color: var(--tinta);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Los numeros de cualquier lado deben alinearse en columna. Es el punto de
+   una app de conteo: dos cifras con la misma cantidad de digitos tienen que
+   ocupar el mismo ancho. */
+.v-application,
+.v-application__wrap {
+  font-family: var(--fuente-ui) !important;
+}
+
+input,
+textarea,
+.v-field__input,
+.v-table td,
+.v-table th {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ==========================================================================
+   Superficies
+   ========================================================================== */
+
+.v-application {
+  background-color: var(--papel) !important;
+}
+
+.v-toolbar,
+.v-app-bar {
+  background-color: var(--superficie) !important;
+  border-bottom: 1px solid var(--regla) !important;
+  box-shadow: none !important;
+}
+
+.v-card {
+  border: 1px solid var(--regla);
+  box-shadow: none !important;
+  background-color: var(--superficie);
+}
+
+.v-card--variant-outlined {
+  border-color: var(--regla);
+}
+
+/* ==========================================================================
+   Tipografia
+   ========================================================================== */
+
+h1,
+h2,
+h3,
+.v-card-title {
+  font-family: var(--fuente-ui);
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  color: var(--tinta);
+}
+
+h1 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+/* Sobreline: la etiqueta pequena que Cap Above muestra arriba de un titulo.
+   Es un recurso tipografico del propio formulario ONU. */
+.sobreline {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--tinta-3);
+  font-feature-settings: 'ss01';
+}
+
+.cifra {
+  font-family: var(--fuente-cifra);
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+}
+
+.mono {
+  font-family: var(--fuente-mono);
+  font-size: 0.8125em;
+  letter-spacing: -0.01em;
+}
+
+/* El 0 con raya: se distingue de la O mayuscula, critico en codigos y
+   coordenadas. JetBrains Mono ya lo trae. */
+.mono-separado {
+  font-family: var(--fuente-mono);
+  font-variant-numeric: tabular-nums slashed-zero;
+}
+
+/* ==========================================================================
+   Etiquetas de seccion
+   ========================================================================== */
+
+.rotulo {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--tinta-3);
+  display: flex;
+  align-items: center;
+  gap: var(--e-2);
+}
+
+.rotulo::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--regla);
+}
+
+/* ==========================================================================
+   Tarjetas del formulario
+   ==========================================================================
+
+   Antes estas clases no existian en el CSS: las secciones del formulario se
+   veian como filas sueltas, sin card y sin padding, y los campos quedaban
+   pegados al borde. Ahora cada bloque es una superficie con aire. */
+.cabecera {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-4);
+}
+
+.cabecera__bloque {
+  padding: var(--e-4);
+  background: var(--superficie);
+  border: 1px solid var(--regla);
+  border-radius: var(--radio-m);
+}
+
+/* ==========================================================================
+   Campos: compactos, con el foco claramente marcado
+   ========================================================================== */
+
+.v-field {
+  border-radius: var(--radio-s) !important;
+  font-size: 0.9375rem;
+}
+
+.v-field--variant-outlined .v-field__outline__start,
+.v-field--variant-outlined .v-field__outline__notch,
+.v-field--variant-outlined .v-field__outline__end {
+  border-color: var(--regla-fuerte);
+}
+
+/* Foco del campo: solo cambia el color del contorno, como hace Vuetify.
+   Antes ademas se subia el grosor a 1.5px, y eso hacia que el campo "respirara"
+   al seleccionarlo. */
+.v-field--focused .v-field__outline__start,
+.v-field--focused .v-field__outline__notch,
+.v-field--focused .v-field__outline__end {
+  border-color: var(--azul);
+}
+
+.v-field__input {
+  min-height: var(--alto-campo);
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+
+.v-field--density-compact .v-field__input {
+  min-height: var(--alto-campo-sm);
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+.v-label {
+  font-size: 0.875rem !important;
+  color: var(--tinta-2);
+}
+
+.v-input__details {
+  font-size: 0.75rem;
+  padding-inline: 2px;
+  min-height: 18px;
+}
+
+.v-messages__message {
+  font-size: 0.75rem !important;
+  line-height: 1.35;
+}
+
+/* Ancho de la barra de foco: accesible y visible sin ser estridente.
+
+   Los campos quedan FUERA a proposito. Antes estaba
+   `.v-field--focused .v-field__outline__start` en esta lista, y como
+   --focused se activa con un clic (no solo con teclado) aparecia un rectangulo
+   azul dibujado dentro del input, con el offset contra el borde. Sobre todo en
+   los select, que ya traen su propia caja de foco, se veía un doble cuadro.
+   El foco de los campos lo marca Vuetify cambiando el color del contorno. */
+.v-btn:focus-visible,
+.v-tabs .v-tab:focus-visible,
+.v-list-item:focus-visible {
+  outline: 2px solid var(--azul);
+  outline-offset: 2px;
+}
+
+/* ==========================================================================
+   Iconos (lucide)
+   ==========================================================================
+
+   Lucide dibuja el svg con width/height fijos en 24, sin mirar el prop
+   `size` de Vuetify. Si se deja asi, todos los iconos salen del mismo tamaño
+   y los botones chico los muestran giganticos. Llevarlos a 1em hace que
+   sigan el font-size del v-icon, que es justamente lo que Vuetify cambia
+   con size="x-small" | "small" | "default". */
+.v-icon > svg {
+  width: 1em;
+  height: 1em;
+}
+
+/* ==========================================================================
+   Botones
+   ========================================================================== */
+
+.v-btn {
+  border-radius: var(--radio-s) !important;
+  font-weight: 600;
+  font-size: 0.875rem;
+  letter-spacing: 0.005em;
+  text-transform: none;
+}
+
+.v-btn--variant-flat {
+  letter-spacing: 0.01em;
+}
+
+/* Los botones de la app son de tinta solida o de texto. El azul de marca se
+   reserva para la accion primaria de cada pantalla, para que el ojo sepa
+   donde esta el "continuar". */
+.v-btn--variant-outlined {
+  border-color: var(--regla-fuerte);
+  color: var(--tinta);
+}
+
+.v-btn--variant-outlined:hover {
+  background: var(--superficie-2);
+}
+
+/* ==========================================================================
+   Insignias de estado
+   ========================================================================== */
+
+.estado {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 9px;
+  border-radius: 3px;
+  border: 1px solid;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.estado--borrador {
+  color: var(--borrador);
+  background: var(--borrador-fondo);
+  border-color: var(--borrador-borde);
+}
+
+.estado--enviada {
+  color: var(--enviada);
+  background: var(--enviada-fondo);
+  border-color: var(--enviada-borde);
+}
+
+.estado--validada {
+  color: var(--validada);
+  background: var(--validada-fondo);
+  border-color: var(--validada-borde);
+}
+
+.estado__punto {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+  flex: none;
+}
+
+/* ==========================================================================
+   Tablas: la grilla de conteo
+   ========================================================================== */
+
+.v-table {
+  background: transparent !important;
+}
+
+.v-table > .v-table__wrapper > table > thead > tr > th {
+  background: var(--superficie-2);
+  color: var(--tinta-3);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--regla-fuerte);
+  white-space: nowrap;
+  height: 40px !important;
+}
+
+.v-table > .v-table__wrapper > table > tbody > tr > td {
+  border-bottom: 1px solid var(--regla);
+  font-size: 0.875rem;
+  height: var(--alto-campo) !important;
+  padding: 0 10px;
+}
+
+/* La fila que se esta editando se marca con una barra a la izquierda, no con
+   un fondo de color: en una grilla de conteo, el fondo tapa las cifras. */
+.fila-activa > td {
+  background: var(--azul-tenue) !important;
+  box-shadow: inset 3px 0 0 var(--azul);
+}
+
+.fila-clicable {
+  cursor: pointer;
+}
+
+.fila-clicable:hover > td {
+  background: var(--superficie-2) !important;
+}
+
+.v-table tbody tr.fila-clicable:focus-visible > td {
+  outline: 2px solid var(--azul);
+  outline-offset: -2px;
+}
+
+/* Celda contable: alineada a la derecha y en cifras. */
+.celda-cifra {
+  text-align: right;
+  font-family: var(--fuente-cifra);
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+}
+
+/* ==========================================================================
+   Dialogos
+   ========================================================================== */
+
+.v-overlay__scrim {
+  background: rgb(22 32 46 / 52%) !important;
+  backdrop-filter: blur(2px);
+}
+
+.v-dialog > .v-overlay__content > .v-card {
+  border-radius: var(--radio-m);
+  box-shadow: 0 12px 32px rgb(22 32 46 / 14%) !important;
+}
+
+/* ==========================================================================
+   Pestanas
+   ========================================================================== */
+
+.v-tabs {
+  border-bottom: 1px solid var(--regla);
+  min-height: 44px;
+}
+
+.v-tab {
+  font-size: 0.875rem !important;
+  font-weight: 600;
+  letter-spacing: 0.005em;
+  text-transform: none;
+  color: var(--tinta-3);
+  min-width: 0 !important;
+}
+
+.v-tab--selected {
+  color: var(--tinta) !important;
+}
+
+.v-slide-group__wrapper {
+  border-bottom: 1px solid var(--regla) !important;
+}
+
+.v-tab .v-tab__slider {
+  color: var(--azul) !important;
+  height: 2px !important;
+}
+
+/* ==========================================================================
+   Fila de conteos del 345W
+   ========================================================================== */
+
+.tira-conteos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0;
+  border: 1px solid var(--regla);
+  border-radius: var(--radio-s);
+  background: var(--superficie);
+  overflow: hidden;
+}
+
+.tira-conteos__celda {
+  flex: 1 1 auto;
+  min-width: 88px;
+  padding: 10px 12px;
+  border-right: 1px solid var(--regla);
+}
+
+.tira-conteos__celda:last-child {
+  border-right: none;
+}
+
+.tira-conteos__etiqueta {
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--tinta-4);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tira-conteos__valor {
+  font-family: var(--fuente-cifra);
+  font-size: 1.375rem;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  color: var(--tinta);
+  line-height: 1.15;
+  margin-top: 2px;
+}
+
+.tira-conteos__valor--vacio {
+  color: var(--tinta-4);
+}
+
+/* ==========================================================================
+   Movimiento
+   ========================================================================== */
+
+.v-list,
+.v-menu,
+.v-overlay__content {
+  transition: transform 0.16s cubic-bezier(0.2, 0, 0, 1),
+    opacity 0.16s cubic-bezier(0.2, 0, 0, 1) !important;
+}
+
+/* Se respeta la preferencia del sistema. Toda la transicion de la app dura
+   menos de 200ms, asi que cuando se pide menos movimiento, se elimina. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ==========================================================================
+   Pantallas angostas
+   ==========================================================================
+   Vuetify aplica `white-space: nowrap` a `.v-card-title`, pensado para los
+   titulos cortos de escritorio. Con un titulo de un renglon y medio se combina
+   con el `overflow: hidden` de la tarjeta y lo recorta a media palabra, sin
+   scrollear y sin avisar. Afecta a cualquier pantalla angosta, asi que se
+   corrige en el origen y no caso por caso. */
+.v-card-title {
+  white-space: normal;
+}
+
+/* ==========================================================================
+   Zonas seguras (edge-to-edge en Android)
+   ==========================================================================
+   La actividad llama a `enableEdgeToEdge()` y con `targetSdk = 36` Android lo
+   exige: el contenido se dibuja debajo de la barra de estado y de la de
+   navegacion. El WebView expone esos solapamientos como `env(safe-area-inset-*)` y
+   `index.html` pide `viewport-fit=cover`, asi que aca solo hay que mover el
+   layout.
+
+   En escritorio `env()` devuelve 0px, todos los `calc()` dan el valor actual y
+   estas reglas no cambian nada. */
+:root {
+  --inset-top: env(safe-area-inset-top, 0px);
+  --inset-bottom: env(safe-area-inset-bottom, 0px);
+  --inset-left: env(safe-area-inset-left, 0px);
+  --inset-right: env(safe-area-inset-right, 0px);
+}
+
+/* `top` SÍ necesita `!important`: Vuetify escribe `top: 0` como estilo INLINE
+   en la barra (en el composable de layout), y un inline gana a cualquier clase
+   sin importar el orden ni el especificidad.
+
+   `left` y `right` NO se tocan nunca, y ese es el punto delicate de esta regla.
+   No son estilos del componente: Vuetify los CALCULA a partir del layout para
+   apartar la barra del navigation drawer, y los escribe en el mismo estilo
+   inline (`left: 248px` con el drawer de 248). Ponerlos aca con `!important` los
+   pisa con 0 y rompe el escritorio de una forma casi invisible: como `env()`
+   devuelve 0 en desktop, el bug no se ve mirando los valores, se ve porque la
+   barra queda dibujada DEBAJO del sidebar y con un hueco de 248px a la derecha.
+
+   Los insets horizontales van por `padding` y no por `left`/`right` justamente
+   por eso: el padding suma adentro de la caja, asi que compone con el offset
+   que Vuetify ya calculo. El fondo sigue llegando al borde (para que el notch
+   quede tapado) y el contenido se corre hacia adentro, que es lo que hace una
+   app nativa. */
+.v-app-bar {
+  top: var(--inset-top) !important;
+  /* `--v-scrollbar-offset` es el padding que Vuetify ya le pone a la barra para
+     no quedar debajo de una barra de desplazamiento clasica. Se suma para no
+     perderlo al escribir padding aca. */
+  padding-left: calc(var(--v-scrollbar-offset, 0px) + var(--inset-left));
+  padding-right: calc(var(--v-scrollbar-offset, 0px) + var(--inset-right));
+}
+
+/* Al mover la barra con `top`, la franja de la barra de estado queda con el
+   fondo de la pagina en vez del fondo de la barra, y como `flat` no dibuja
+   sombra el cambio de tono se ve. Este pseudoelemento pinta esa franja con el
+   mismo fondo de la barra, para que la barra de estado se vea como parte de
+   ella y no como un borde. Va antes que el contenido y no intercepta toques.
+
+   `inset-inline: 0` resuelve contra la caja de padding de la barra, que es
+   igual a su borde: el `padding` de arriba corre el contenido pero no encoge el
+   fondo, asi que la franja sigue cubriendo el ancho completo. */
+.v-app-bar::before {
+  content: '';
+  position: absolute;
+  inset-inline: 0;
+  top: calc(var(--inset-top) * -1);
+  height: var(--inset-top);
+  background: inherit;
+  pointer-events: none;
+}
+
+/* Los cuatro `padding` de `.v-main` vienen de VMain.css, que esta dentro de
+   `@layer vuetify-components`. Las reglas de este archivo van sin capa, y sin
+   capa ganan: por eso aca no hace falta `!important`. Los laterales se suman al
+   `--v-layout-*`, que es el mismo offset del drawer. */
+.v-main {
+  padding-top: calc(var(--v-layout-top) + var(--inset-top));
+  padding-left: calc(var(--v-layout-left) + var(--inset-left));
+  padding-right: calc(var(--v-layout-right) + var(--inset-right));
+}
+
+/* Esta app scrollea el DOCUMENTO, no un `v-main` interno, asi que esto no
+   crea una barra fija: reserva el hueco al final del contenido, que es donde
+   la barra de navegacion taparia la ultima fila.
+
+   Chrome desaconseja poner un safe-area-inset en un `padding` porque su "chin"
+   se mueve al scrollear y eso causa layout thrashing. Aca no aplica: el chin es
+   de Chrome en navegador, y en un WebView el inset es estatico. */
+.v-application__wrap {
+  padding-bottom: var(--inset-bottom);
+}
+
+
+/* ==========================================================================
+   Impresion
+   ==========================================================================
+   A veces la jornada se imprime para el legajo en papel, asi que el estado del
+   formulario tiene que quedar en blanco y negro legible. */
+@media print {
+  .v-toolbar,
+  .v-app-bar,
+  .no-imprimir {
+    display: none !important;
+  }
+
+  body,
+  .v-application {
+    background: #fff !important;
+  }
+
+  .v-card,
+  .tira-conteos {
+    border-color: #999 !important;
+    break-inside: avoid;
+  }
+}
+

@@ -1,0 +1,45 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+
+# Supabase CLI (credenciales de linkeo, cache de migraciones)
+supabase/.temp
+supabase/.branches
+supabase/.env
+.env
+.env.*
+!.env.example
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Scripts de verificacion contra la DB real: corren contra produccion y leen
+# la service_role del CLI. No se versionan. Para usarlos, copialos desde el
+# repo y correlos con run-verify-submit.ps1, que inyecta las claves por entorno.
+scripts/verify-*.mjs
+scripts/run-verify-*.ps1
+
+# Crea usuarios de prueba PERSISTENTES (a diferencia de verify-*, que los borran
+# al terminar). Misma razon para no versionarlo: opera contra produccion con la
+# service_role y deja cuentas reales de acceso. La contrasena nunca se hardcodea,
+# va por --clave o por CLAVE_PRUEBA.
+scripts/crear-usuarios-prueba.mjs
+scripts/run-crear-usuarios-prueba.ps1

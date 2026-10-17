@@ -1,0 +1,25 @@
+-- ============================================================================
+-- supabase/seed.sql
+-- ----------------------------------------------------------------------------
+-- Datos iniciales de los catalogos.
+--
+-- La fuente unica de verdad es la migracion 009:
+--
+--     supabase/migrations/20260927120009_009_seed.sql
+--
+-- Este archivo la incluye con \ir (include relativo, resuelto por psql respecto
+-- de este archivo) en vez de duplicar el contenido. Asi no hay dos copias que
+-- puedan quedar desincronizadas.
+--
+-- Cuando se ejecuta:
+--   - supabase db reset   (desarrollo local, usa [db.seed] de config.toml)
+--   - supabase db push --include-seed
+-- En ambos casos el orden da igual, porque los inserts son idempotentes
+-- (ON CONFLICT DO NOTHING) y la migracion 009 ya habria sembrado lo mismo.
+--
+-- Si vas a pegar esto en el SQL Editor, ejecutá directamente
+-- supabase/migrations/20260927120009_009_seed.sql: \ir es una directiva de psql
+-- y el SQL Editor no la entiende.
+-- ============================================================================
+
+\ir ../migrations/20260927120009_009_seed.sql

@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/tauri.svg" />
+    <!-- `viewport-fit=cover` es el opt-in explicito a edge-to-edge: sin el, el
+         WebView puede recortar el viewport antes de las barras del sistema. Con
+         el, el contenido llega hasta el borde y los insets reales llegan por
+         `env(safe-area-inset-*)`, que es lo que usa main.css. -->
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
+    <title>Sistema Telar</title>
+  </head>
+
+  <body>
+    <div id="app"></div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

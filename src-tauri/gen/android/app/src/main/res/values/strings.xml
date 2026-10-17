@@ -1,0 +1,7 @@
+<!-- El nombre que ve la persona: en el launcher, en la app reciente y en el
+     splash de Android 12+. Las comillas literales que tenia antes se mostraban
+     tal cual en el launcher, de ahi que fussara "data-recollection-ftr". -->
+<resources>
+    <string name="app_name">Sistema Telar</string>
+    <string name="main_activity_title">Sistema Telar</string>
+</resources>
